@@ -1,4 +1,5 @@
 "use client";
+//Component contains both title list and its content
 /**If not signed in: show example books + clippings
  * if signed in: populate from the DB
  */
@@ -155,7 +156,7 @@ function Content({ clippings }: BookContentProps){
 }
 
 //parent component that handles BookListBar + BookContent layout and props
-export default function ParentBook(){
+export default function ContentComponent(){
     const books = Object.keys(clippingsData)
     const [selectedBook, setSelectedBook] = useState(books[0])
 

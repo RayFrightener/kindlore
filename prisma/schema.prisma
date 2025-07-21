@@ -17,6 +17,10 @@ model User {
   sessions      Session[]
   // Optional for WebAuthn support
   Authenticator Authenticator[]
+
+  books        Book[]
+  clippings    Clipping[]
+  reflections  Reflection[]
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -75,4 +79,48 @@ model Authenticator {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
  
   @@id([userId, credentialID])
+}
+
+model Book {
+  id        String     @id @default(cuid())
+  title     String
+  author    String?
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clippings Clipping[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([userId, title])
+}
+
+model Clipping {
+  id        String       @id @default(cuid())
+  bookId    String
+  book      Book         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  highlight String
+  location  String?
+  addedAt   DateTime
+  reflections Reflection[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([bookId])
+  @@index([userId])
+}
+
+model Reflection {
+  id         String    @id @default(cuid())
+  clippingId String
+  clipping   Clipping  @relation(fields: [clippingId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  text       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([clippingId])
+  @@index([userId])
 }

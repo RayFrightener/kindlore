@@ -1,7 +1,8 @@
-import ParentBook from "@/components/ParentBook";
+import ContentComponent from "@/components/ContentContainer";
+
 
 export default function Home() {
   return (
-    <ParentBook />
+    <ContentComponent />
   );
 }
