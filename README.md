@@ -55,6 +55,10 @@ Kindlore helps you organize and reflect on your Kindle highlights. Upload your c
 - Projects demonstrate end-to-end skills: database design, API development, UI/UX
 - Code is clean, modular, and production-ready
 
+## Resume
+
+Interested in my experience? [Download my resume](public/softwareEngineerPranshuChawlaResume2025.docx.pdf).
+
 ## Contact
 
 - [LinkedIn](https://www.linkedin.com/in/pranshu-chawla-/)
