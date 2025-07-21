@@ -57,7 +57,7 @@ Kindlore helps you organize and reflect on your Kindle highlights. Upload your c
 
 ## Resume
 
-Interested in my experience? [Download my resume](public/softwareEngineerPranshuChawlaResume2025.docx.pdf).
+Interested in my experience? [Download my resume](https://pranshublog-rho.vercel.app/softwareEngineerPranshuChawlaResume2025.docx.pdf).
 
 ## Contact
 
