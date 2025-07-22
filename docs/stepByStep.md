@@ -1,5 +1,5 @@
 ```npx create-next-app . ```
-```npm install prisma@latest @prisma/client@latest next-auth@latest @auth/prisma-adapter@latest react-icons@latest```
+```npm install prisma@latest @prisma/client@latest next-auth@beta @auth/prisma-adapter@latest react-icons@latest```
 
 ### DB Initialization
 pre-requisite - create DB schema
