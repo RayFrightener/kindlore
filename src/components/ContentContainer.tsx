@@ -6,6 +6,9 @@
 
 import { useState } from "react";
 import { FaPaperPlane } from "react-icons/fa";
+import { useToast } from "@/utils/showToast";
+import { useSession } from "next-auth/react";
+import {protectedAction} from "@/utils/protectedAction";
 
 //sample data for site visitors
 export interface Clipping {
@@ -104,6 +107,7 @@ interface BookListSideBarProps {
 
 //Title List sidebar component
 function TitleListSideBar({ books, selectedBook, onSelect}: BookListSideBarProps){
+
     return(
         <aside className="border-r border-[#AA9c9c]">
             <ul>
@@ -129,15 +133,29 @@ interface BookContentProps {
 //parent component to manage title list and content
 //based on selected title from the list on the left -> display title 
 function Content({ clippings }: BookContentProps){
-    if(!clippings) return <div className="p-4"> There are no clippings for this book! Please select a bookt that has atleast 1 clipping.</div>
+  const { data: session } = useSession();
+  const [toast, showToast] = useToast();
+
+  function handleProtectedAction() {
+    if (!protectedAction(session, showToast)) return false; 
+    return true;
+  }
+    if(!clippings) return <div className="p-4"> There are no clippings for this book!</div>
     return (
         <section className="w-full sm:w-[80vw]">
+          {toast && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#222] text-white px-4 py-2 rounded shadow-lg z-50 animate-fade-in">
+                    {toast}
+                </div>
+            )}
+
             {clippings.map((clip) => (
                 <div key={clip.id} className="pt-4 pl-4 pr-4 pb-2">
                     <div className="text-xs pb-1"> {clip.id}. {clip.date} {clip.time} </div>
                     <div className="text-lg">{clip.clipping}</div>
                     <button
                         className="mt-2 mb-1 bg-[#B8ACAC] px-2 py-1 rounded cursor-pointer"
+                        onClick={handleProtectedAction}
                     >
                         Add note
                     </button>
@@ -146,7 +164,9 @@ function Content({ clippings }: BookContentProps){
                         placeholder="Please write your notes/reflections here"
                         onChange={(e) => e.target.value}
                         />
-                    <button className="pt-2 cursor-pointer">
+                    <button className="pt-2 cursor-pointer"
+                    onClick={handleProtectedAction}
+                    >
                         <FaPaperPlane />
                     </button>
                 </div>
