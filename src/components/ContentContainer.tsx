@@ -5,10 +5,12 @@
  */
 
 import { useState } from "react";
-import { FaPaperPlane } from "react-icons/fa";
-import { useToast } from "@/utils/showToast";
 import { useSession } from "next-auth/react";
+//comps and utils
+import { useToast } from "@/utils/showToast";
 import {protectedAction} from "@/utils/protectedAction";
+//icons
+import { FaPaperPlane } from "react-icons/fa";
 
 //sample data for site visitors
 export interface Clipping {
@@ -17,8 +19,8 @@ export interface Clipping {
     date: string;
     clipping: string;
 }
-export type ClippingsDate = Record<string, Clipping[]>;
-const clippingsData: ClippingsDate = {
+export type ClippingsData = Record<string, Clipping[]>;
+const clippingsData: ClippingsData = {
   "Meditations - Marcus Aurelius": [
     {
       id: 1,
@@ -105,7 +107,7 @@ interface BookListSideBarProps {
     onSelect: (book: string) => void;
 }
 
-//Title List sidebar component
+//Title List sidebar
 function TitleListSideBar({ books, selectedBook, onSelect}: BookListSideBarProps){
 
     return(

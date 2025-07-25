@@ -2,6 +2,9 @@
 #mine
 /docs/componentExamples
 /docs/journal.md
+/public/My Clippings.txt
+testParse.ts
+
 # dependencies
 /node_modules
 /.pnp
