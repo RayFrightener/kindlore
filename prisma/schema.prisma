@@ -24,6 +24,9 @@ model User {
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  hasSetEncryptionPassword Boolean @default(false)
+  encryptionSalt            String?
 }
  
 model Account {
@@ -84,7 +87,9 @@ model Authenticator {
 model Book {
   id        String     @id @default(cuid())
   title     String
+  titleIv   String
   author    String?
+  authorIv  String
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   clippings Clipping[]
@@ -106,6 +111,7 @@ model Clipping {
   reflections Reflection[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+  iv        String
 
   @@index([bookId])
   @@index([userId])
@@ -118,6 +124,7 @@ model Reflection {
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   text       String
+  iv         String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 

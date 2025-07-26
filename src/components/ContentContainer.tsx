@@ -4,11 +4,16 @@
  * if signed in: populate from the DB
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 //comps and utils
-import { useToast } from "@/utils/showToast";
-import {protectedAction} from "@/utils/protectedAction";
+import { useToast } from "@/utils/eternal/showToast";
+import {protectedAction} from "@/utils/eternal/protectedAction";
+import PasswordModal from "./PasswordModal";
+import { generateSalt, deriveKey } from "@/utils/eternal/encryptionUtils";
+import { useEncryptionKey } from "@/components/EncryptionKeyContext";
+import { encryptWithKey, decryptWithKey } from "@/utils/eternal/encryptionUtils";
+
 //icons
 import { FaPaperPlane } from "react-icons/fa";
 
@@ -151,9 +156,9 @@ function Content({ clippings }: BookContentProps){
                 </div>
             )}
 
-            {clippings.map((clip) => (
+            {clippings.map((clip, index) => (
                 <div key={clip.id} className="pt-4 pl-4 pr-4 pb-2">
-                    <div className="text-xs pb-1"> {clip.id}. {clip.date} {clip.time} </div>
+                    <div className="text-xs pb-1">{index + 1}. {clip.date} {clip.time} </div>
                     <div className="text-lg">{clip.clipping}</div>
                     <button
                         className="mt-2 mb-1 bg-[#B8ACAC] px-2 py-1 rounded cursor-pointer"
@@ -178,15 +183,141 @@ function Content({ clippings }: BookContentProps){
 }
 
 //parent component that handles BookListBar + BookContent layout and props
-export default function ContentComponent(){
-    const books = Object.keys(clippingsData)
-    const [selectedBook, setSelectedBook] = useState(books[0])
+export default function ContentComponent() {
+  const { data: session } = useSession();
+  const [books, setBooks] = useState<string[]>([]);
+  const [selectedBook, setSelectedBook] = useState<string | undefined>(undefined);
+  const [userClippings, setUserClippings] = useState<ClippingsData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { encryptionKey, setEncryptionKey } = useEncryptionKey();
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
+  
 
-    return(
-        <div className="grid grid-cols-1 sm:grid-cols-[20%_80%] min-h-screen">
-            <TitleListSideBar books={books} selectedBook={selectedBook} onSelect={setSelectedBook} />
-            <Content clippings={clippingsData[selectedBook]}/>
-        </div>
-    );
-}
+  async function handlePasswordSubmit(password: string) {
+    let salt;
+    if (isFirstTime) {
+      // First time: generate and store new salt
+      salt = generateSalt();
+      await fetch("/api/user/encryption-salt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ salt }),
+      });
+    } else {
+      // Not first time: fetch existing salt
+      const res = await fetch("/api/user/encryption-salt", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      // console.log("Fetched salt from API:", data.salt);
+      salt = data.salt;
+    }
+    const key = await deriveKey(password, salt);
+    // console.log("Derived key:", key);
+    setEncryptionKey(key);
+    setShowPasswordModal(false);
+  }
+
+  useEffect(() => {
+    fetch("/api/user")
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setIsFirstTime(!data.hasSetEncryptionPassword);
+          setShowPasswordModal(true);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      // Not signed in: show demo data
+      setBooks(Object.keys(clippingsData));
+      setSelectedBook(Object.keys(clippingsData)[0]);
+      setUserClippings(null);
+      setLoading(false);
+      return;
+    }
+    if (!encryptionKey) return; // Don't fetch if key not set
+
+    setLoading(true);
+    fetch("/api/books")
+      .then(res => res.json())
+      .then(async ({ books }) => {
+        if (!books || books.length === 0) {
+          setUserClippings(null);
+          setBooks([]);
+          setLoading(false);
+          return;
+        }
+      // Decrypt books and clippings
+      const decryptedData: ClippingsData = {};
+      for (const book of books) {
+        try {
+          const title = await decryptWithKey(encryptionKey, book.title, book.titleIv);
+          decryptedData[title] = [];
+          for (const clip of book.clippings) {
+            try {
+              const clippingText = await decryptWithKey(encryptionKey, clip.highlight, clip.iv);
+              // Convert addedAt to date and time strings
+              const addedAt = clip.addedAt ? new Date(clip.addedAt) : null;
+              const dateStr = addedAt
+                ? addedAt.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                : "";
+              const timeStr = addedAt
+                ? addedAt.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                : "";
+              decryptedData[title].push({
+                id: clip.id,
+                date: dateStr,
+                time: timeStr,
+                clipping: clippingText,
+              });
+            } catch (err) {
+              console.error("Clipping decryption error:", err, clip);
+              // Optionally skip this clipping
+            }
+          }
+        } catch (err) {
+          console.error("Book decryption error:", err, book);
+          setLoading(false);
+          setShowPasswordModal(true);
+          return;
+        }
+      }
+      setUserClippings(decryptedData);
+      setBooks(Object.keys(decryptedData));
+      setSelectedBook(Object.keys(decryptedData)[0]);
+      setLoading(false);
+    });
+  }, [session, encryptionKey]);
+
+  // Choose data source
+  const clippingsToShow =
+    session && encryptionKey && userClippings
+      ? userClippings[selectedBook!] || []
+      : clippingsData[selectedBook || Object.keys(clippingsData)[0]];
+
+  // Render
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-[20%_80%] min-h-screen">
+      {showPasswordModal && isFirstTime !== null && (
+        <PasswordModal
+          isFirstTime={isFirstTime}
+          onSubmit={handlePasswordSubmit}
+        />
+      )}
+      <TitleListSideBar books={books} selectedBook={selectedBook!} onSelect={setSelectedBook} />
+      {loading ? (
+        <div className="p-4">Loading your books...</div>
+      ) : session && encryptionKey && (!userClippings || books.length === 0) ? (
+        <div className="p-4">Please upload a file to see your clippings.</div>
+      ) : (
+        <Content clippings={clippingsToShow} />
+      )}
+    </div>
+  );
+  }
 

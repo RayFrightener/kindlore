@@ -11,6 +11,11 @@ export async function getCurrentUser() {
 
   return prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true, email: true, name: true }, // Add more fields if needed
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      hasSetEncryptionPassword: true, 
+    },
   });
 }
