@@ -1,10 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
+import { useEncryptionKey } from "./EncryptionKeyContext";
+import {
+  encryptWithKey,
+  decryptWithKey,
+} from "@/utils/eternal/encryptionUtils";
 
-export default function ClippingReflection({ onSend }: { onSend?: (text: string) => void }) {
+export default function ClippingReflection({
+  clippingId,
+}: {
+  clippingId: string;
+}) {
   const [reflections, setReflections] = useState<string[]>([]);
   const [showInput, setShowInput] = useState(false);
   const [input, setInput] = useState("");
+  const { encryptionKey } = useEncryptionKey();
+  // Fetch and decrypt reflections on mount or when clippingId/encryptionKey changes
+  useEffect(() => {
+    if (!encryptionKey || !clippingId) return;
+    fetch(`/api/reflection?clippingId=${clippingId}`)
+      .then((res) => res.json())
+      .then(async (data) => {
+        if (data.reflections) {
+          const decrypted = await Promise.all(
+            data.reflections.map((r: any) =>
+              decryptWithKey(encryptionKey, r.text, r.iv)
+            )
+          );
+          setReflections(decrypted);
+        }
+      });
+  }, [clippingId, encryptionKey]);
 
   // Show input when Add note is clicked
   const handleAddNote = () => {
@@ -12,14 +38,18 @@ export default function ClippingReflection({ onSend }: { onSend?: (text: string)
     setInput("");
   };
 
-  // Handle send
-  const handleSend = () => {
-    if (input.trim()) {
-      setReflections([...reflections, input]);
-      if (onSend) onSend(input);
-      setShowInput(false);
-      setInput("");
-    }
+  // Encrypt and send reflection
+  const handleSend = async () => {
+    if (!input.trim() || !encryptionKey) return;
+    const { cipherText, iv } = await encryptWithKey(encryptionKey, input);
+    await fetch("/api/reflection", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clippingId, text: cipherText, iv }),
+    });
+    setReflections([...reflections, input]);
+    setShowInput(false);
+    setInput("");
   };
 
   return (
@@ -27,12 +57,12 @@ export default function ClippingReflection({ onSend }: { onSend?: (text: string)
       {/* Show reflections */}
       {reflections.map((text, idx) => (
         <div
-            key={idx}
-            className="my-2 p-3 bg-[#ECE9E6] border border-[#AA9C9C] rounded-lg text-gray-800 shadow-sm"
+          key={idx}
+          className="my-2 p-3 bg-[#ECE9E6] border border-[#AA9C9C] rounded-lg text-gray-800 shadow-sm"
         >
-            <div className="pl-1 text-sm">{text}</div>
+          <div className="pl-1 text-sm">{text}</div>
         </div>
-        ))}
+      ))}
       {/* Show Add note button if not showing input */}
       {!showInput && (
         <button
@@ -49,12 +79,9 @@ export default function ClippingReflection({ onSend }: { onSend?: (text: string)
             className="w-full p-2 border border-[#AA9C9C] focus:outline-none focus:ring-2 focus:ring-[#AA9C9C] rounded"
             placeholder="Please write your notes/reflections here"
             value={input}
-            onChange={e => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)}
           />
-          <button
-            className="p-2 cursor-pointer"
-            onClick={handleSend}
-          >
+          <button className="p-2 cursor-pointer" onClick={handleSend}>
             <FaPaperPlane />
           </button>
         </div>

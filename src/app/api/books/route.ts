@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/utils/eternal/getCurrentUser";
+import { withUserAndRLS } from "@/utils/eternal/userAndRls";
 
 export async function GET() {
-  const user = await getCurrentUser();
+  const user = await withUserAndRLS();
+  if (user instanceof NextResponse) return user;
   if (!user) return NextResponse.json({ books: [] });
 
   const books = await prisma.book.findMany({
