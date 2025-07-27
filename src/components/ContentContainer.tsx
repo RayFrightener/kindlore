@@ -13,6 +13,7 @@ import PasswordModal from "./PasswordModal";
 import { generateSalt, deriveKey } from "@/utils/eternal/encryptionUtils";
 import { useEncryptionKey } from "@/components/EncryptionKeyContext";
 import { encryptWithKey, decryptWithKey } from "@/utils/eternal/encryptionUtils";
+import ClippingReflection from "./ClippingReflection";
 
 //icons
 import { FaPaperPlane } from "react-icons/fa";
@@ -149,33 +150,36 @@ function Content({ clippings }: BookContentProps){
   }
     if(!clippings) return <div className="p-4"> There are no clippings for this book!</div>
     return (
-        <section className="w-full sm:w-[80vw]">
-          {toast && (
-                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#222] text-white px-4 py-2 rounded shadow-lg z-50 animate-fade-in">
-                    {toast}
-                </div>
-            )}
+          <section className="w-full sm:w-[80vw]">
+            {toast && (
+                  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#222] text-white px-4 py-2 rounded shadow-lg z-50 animate-fade-in">
+                      {toast}
+                  </div>
+              )}
 
-            {clippings.map((clip, index) => (
-                <div key={clip.id} className="pt-4 pl-4 pr-4 pb-2">
-                    <div className="text-xs pb-1">{index + 1}. {clip.date} {clip.time} </div>
-                    <div className="text-lg">{clip.clipping}</div>
+                  {clippings.map((clip, index) => (
+                      <div key={clip.id} className="pt-4 pl-4 pr-4 pb-2">
+                          <div className="text-xs pb-1">{index + 1}. {clip.date} {clip.time} </div>
+                          <div className="text-lg">{clip.clipping}</div>
+                          {session ? (
+                      <ClippingReflection onSend={text => {/* handle reflection save */}} />
+                ) : (
+                  <>
                     <button
-                        className="mt-2 mb-1 bg-[#B8ACAC] px-2 py-1 rounded cursor-pointer"
-                        onClick={handleProtectedAction}
+                      className="mt-2 mb-1 bg-[#B8ACAC] px-2 py-1 rounded cursor-pointer"
+                      onClick={handleProtectedAction}
                     >
-                        Add note
+                      Add note
                     </button>
                     <textarea
-                        className="w-full p-2 border border-[#AA9C9C] focus:outline-none focus:ring-2 focus:ring-[#AA9C9C]"
-                        placeholder="Please write your notes/reflections here"
-                        onChange={(e) => e.target.value}
-                        />
-                    <button className="pt-2 cursor-pointer"
-                    onClick={handleProtectedAction}
-                    >
-                        <FaPaperPlane />
+                      className="w-full p-2 border border-[#AA9C9C] focus:outline-none focus:ring-2 focus:ring-[#AA9C9C]"
+                      placeholder="Please write your notes/reflections here"
+                    />
+                    <button className="pt-2 cursor-pointer" onClick={handleProtectedAction}>
+                      <FaPaperPlane />
                     </button>
+                  </>
+                )}
                 </div>
             ))}
         </section>
