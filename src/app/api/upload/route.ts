@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { withUserAndRLS } from "@/utils/eternal/userAndRls";
 
 export async function POST(req: Request) {
-try {
+  try {
     // 1. Get user and set RLS
     const user = await withUserAndRLS();
     if (!user || user instanceof NextResponse) return user;
@@ -15,7 +15,7 @@ try {
     for (const book of books) {
       const dbBook = await prisma.book.upsert({
         where: {
-          userId_title: { userId: user.id, title: book.title.cipherText }
+          userId_title: { userId: user.id, title: book.title.cipherText },
         },
         update: { author: book.author.cipherText },
         create: {
@@ -38,7 +38,7 @@ try {
         });
 
         if (!exists) {
-            // console.log("Storing:", clip.clipping.cipherText, clip.clipping.iv);
+          // console.log("Storing:", clip.clipping.cipherText, clip.clipping.iv);
           await prisma.clipping.create({
             data: {
               userId: user.id,
@@ -52,8 +52,10 @@ try {
       }
     }
     return NextResponse.json({ success: true });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Upload error:", err);
-    return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
+    const message =
+      err instanceof Error ? err.message : "Internal Server Error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { useEncryptionKey } from "./EncryptionKeyContext";
 import {
@@ -55,27 +55,31 @@ export default function ClippingReflection({
     // Refetch reflections to get the new one with correct id and decrypted text
     fetchReflections();
   };
-
+  type ReflectionApi = {
+    id: string;
+    text: string;
+    iv: string;
+  };
   // Helper to fetch and decrypt reflections
-  const fetchReflections = async () => {
+
+  const fetchReflections = useCallback(async () => {
     if (!encryptionKey || !clippingId) return;
     const res = await fetch(`/api/reflection?clippingId=${clippingId}`);
     const data = await res.json();
     if (data.reflections) {
       const decrypted = await Promise.all(
-        data.reflections.map(async (r: any) => ({
+        (data.reflections as ReflectionApi[]).map(async (r) => ({
           id: r.id,
           text: await decryptWithKey(encryptionKey, r.text, r.iv),
         }))
       );
       setReflections(decrypted);
     }
-  };
+  }, [encryptionKey, clippingId]);
 
-  // Use fetchReflections in useEffect
   useEffect(() => {
     fetchReflections();
-  }, [clippingId, encryptionKey]);
+  }, [fetchReflections]);
 
   const handleDelete = async (id: string) => {
     await fetch(`/api/reflection?id=${id}`, { method: "DELETE" });

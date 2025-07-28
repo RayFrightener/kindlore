@@ -12,15 +12,11 @@ import { protectedAction } from "@/utils/eternal/protectedAction";
 import PasswordModal from "./PasswordModal";
 import { generateSalt, deriveKey } from "@/utils/eternal/encryptionUtils";
 import { useEncryptionKey } from "@/components/EncryptionKeyContext";
-import {
-  encryptWithKey,
-  decryptWithKey,
-} from "@/utils/eternal/encryptionUtils";
+import { decryptWithKey } from "@/utils/eternal/encryptionUtils";
 import ClippingReflection from "./ClippingReflection";
 
 //icons
 import { FaPaperPlane } from "react-icons/fa";
-import { IoSearch } from "react-icons/io5";
 
 //sample data for site visitors
 export interface Clipping {
@@ -342,8 +338,7 @@ export default function ContentComponent() {
                 // Optionally skip this clipping
               }
             }
-          } catch (err) {
-            // console.error("Book decryption error:", err, book);
+          } catch {
             setLoading(false);
             setShowPasswordModal(true);
             return;
