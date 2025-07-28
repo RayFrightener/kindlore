@@ -5,32 +5,36 @@ import {
   encryptWithKey,
   decryptWithKey,
 } from "@/utils/eternal/encryptionUtils";
+import { ImBin } from "react-icons/im";
 
 export default function ClippingReflection({
   clippingId,
 }: {
   clippingId: string;
 }) {
-  const [reflections, setReflections] = useState<string[]>([]);
+  const [reflections, setReflections] = useState<
+    { id: string; text: string }[]
+  >([]);
   const [showInput, setShowInput] = useState(false);
   const [input, setInput] = useState("");
   const { encryptionKey } = useEncryptionKey();
   // Fetch and decrypt reflections on mount or when clippingId/encryptionKey changes
-  useEffect(() => {
-    if (!encryptionKey || !clippingId) return;
-    fetch(`/api/reflection?clippingId=${clippingId}`)
-      .then((res) => res.json())
-      .then(async (data) => {
-        if (data.reflections) {
-          const decrypted = await Promise.all(
-            data.reflections.map((r: any) =>
-              decryptWithKey(encryptionKey, r.text, r.iv)
-            )
-          );
-          setReflections(decrypted);
-        }
-      });
-  }, [clippingId, encryptionKey]);
+  // useEffect(() => {
+  //   if (!encryptionKey || !clippingId) return;
+  //   fetch(`/api/reflection?clippingId=${clippingId}`)
+  //     .then((res) => res.json())
+  //     .then(async (data) => {
+  //       if (data.reflections) {
+  //         const decrypted = await Promise.all(
+  //           data.reflections.map(async (r: any) => ({
+  //             id: r.id,
+  //             text: await decryptWithKey(encryptionKey, r.text, r.iv),
+  //           }))
+  //         );
+  //         setReflections(decrypted);
+  //       }
+  //     });
+  // }, [clippingId, encryptionKey]);
 
   // Show input when Add note is clicked
   const handleAddNote = () => {
@@ -38,7 +42,6 @@ export default function ClippingReflection({
     setInput("");
   };
 
-  // Encrypt and send reflection
   const handleSend = async () => {
     if (!input.trim() || !encryptionKey) return;
     const { cipherText, iv } = await encryptWithKey(encryptionKey, input);
@@ -47,20 +50,54 @@ export default function ClippingReflection({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ clippingId, text: cipherText, iv }),
     });
-    setReflections([...reflections, input]);
-    setShowInput(false);
     setInput("");
+    setShowInput(false);
+    // Refetch reflections to get the new one with correct id and decrypted text
+    fetchReflections();
+  };
+
+  // Helper to fetch and decrypt reflections
+  const fetchReflections = async () => {
+    if (!encryptionKey || !clippingId) return;
+    const res = await fetch(`/api/reflection?clippingId=${clippingId}`);
+    const data = await res.json();
+    if (data.reflections) {
+      const decrypted = await Promise.all(
+        data.reflections.map(async (r: any) => ({
+          id: r.id,
+          text: await decryptWithKey(encryptionKey, r.text, r.iv),
+        }))
+      );
+      setReflections(decrypted);
+    }
+  };
+
+  // Use fetchReflections in useEffect
+  useEffect(() => {
+    fetchReflections();
+  }, [clippingId, encryptionKey]);
+
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/reflection?id=${id}`, { method: "DELETE" });
+    setReflections(reflections.filter((r) => r.id !== id));
   };
 
   return (
     <div>
       {/* Show reflections */}
-      {reflections.map((text, idx) => (
+      {reflections.map((r) => (
         <div
-          key={idx}
-          className="my-2 p-3 bg-[#ECE9E6] border border-[#AA9C9C] rounded-lg text-gray-800 shadow-sm"
+          key={r.id}
+          className="my-2 p-3 bg-[#ECE9E6] border border-[#AA9C9C] rounded-lg text-gray-800 shadow-sm flex items-center justify-between"
         >
-          <div className="pl-1 text-sm">{text}</div>
+          <div className="pl-1 text-sm break-words">{r.text}</div>
+          <button
+            className="ml-2 cursor-pointer hover:text-red-800"
+            onClick={() => handleDelete(r.id)}
+            title="Delete reflection"
+          >
+            <ImBin />
+          </button>
         </div>
       ))}
       {/* Show Add note button if not showing input */}

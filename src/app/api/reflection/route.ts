@@ -41,3 +41,23 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ reflections });
 }
+
+export async function DELETE(req: NextRequest) {
+  const user = await withUserAndRLS();
+  if (user instanceof NextResponse) return user;
+  if (!user?.id)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { searchParams } = new URL(req.url);
+  const reflectionId = searchParams.get("id");
+  if (!reflectionId)
+    return NextResponse.json(
+      { error: "Missing reflection id" },
+      { status: 400 }
+    );
+
+  await prisma.reflection.delete({
+    where: { id: reflectionId },
+  });
+
+  return NextResponse.json({ success: true });
+}
