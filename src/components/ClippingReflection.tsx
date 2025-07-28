@@ -117,6 +117,12 @@ export default function ClippingReflection({
             placeholder="Please write your notes/reflections here"
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey && input.trim()) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
           />
           <button className="p-2 cursor-pointer" onClick={handleSend}>
             <FaPaperPlane />
