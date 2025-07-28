@@ -5,7 +5,10 @@ interface PasswordModalProps {
   onSubmit: (password: string) => void;
 }
 
-export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalProps) {
+export default function PasswordModal({
+  isFirstTime,
+  onSubmit,
+}: PasswordModalProps) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
@@ -22,7 +25,6 @@ export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalPr
       return;
     }
     setError("");
-    // console.log("Password entered:", `"${password}"`, "length:", password.length);
     onSubmit(password);
   }
 
@@ -35,15 +37,24 @@ export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalPr
         <p className="text-sm text-gray-700 mb-4 text-center">
           {isFirstTime ? (
             <>
-              Your data is <span className="font-semibold">end-to-end encrypted</span>. This means only you can view your books, highlights, and reflections—no one else, not even Kindlore. <br />
+              Your data is{" "}
+              <span className="font-semibold">end-to-end encrypted</span>. This
+              means only you can view your books, highlights, and reflections—no
+              one else, not even Kindlore. <br />
               Please set a password to protect your privacy. <br />
-              <span className="font-semibold text-red-700">If you forget your password, your data cannot be recovered.</span> <br />
+              <span className="font-semibold text-red-700">
+                If you forget your password, your data cannot be recovered.
+              </span>{" "}
+              <br />
               Store your password somewhere safe.
             </>
           ) : (
             <>
               Enter your encryption password to unlock your private data. <br />
-              <span className="font-semibold text-red-700">Only you can decrypt your information. If you forget your password, your data cannot be recovered.</span>
+              <span className="font-semibold text-red-700">
+                Only you can decrypt your information. If you forget your
+                password, your data cannot be recovered.
+              </span>
             </>
           )}
         </p>
@@ -53,7 +64,7 @@ export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalPr
             className="w-full p-2 border border-[#AA9C9C] rounded focus:outline-none focus:ring-2 focus:ring-[#AA9C9C]"
             placeholder="Enter password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             autoFocus
           />
           {isFirstTime && (
@@ -62,10 +73,10 @@ export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalPr
               className="w-full p-2 border border-[#AA9C9C] rounded focus:outline-none focus:ring-2 focus:ring-[#AA9C9C]"
               placeholder="Confirm password"
               value={confirm}
-              onChange={e => setConfirm(e.target.value)}
+              onChange={(e) => setConfirm(e.target.value)}
             />
           )}
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
             <input
               type="checkbox"
               checked={showPassword}
@@ -73,7 +84,9 @@ export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalPr
             />
             Show password
           </label>
-          {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+          {error && (
+            <div className="text-red-600 text-sm text-center">{error}</div>
+          )}
           <button
             type="submit"
             className="bg-[#B8ACAC] text-gray-900 px-4 py-2 rounded font-semibold mt-2 hover:bg-[#AA9C9C] transition cursor-pointer"
@@ -86,20 +99,19 @@ export default function PasswordModal({ isFirstTime, onSubmit }: PasswordModalPr
   );
 }
 
-                    
-                    // <button className="pt-2 cursor-pointer"
-                    //                     onClick={handleProtectedAction}
-                    //                     >
-                    //                         <FaPaperPlane />
-                    // <div>border-r border-[#AA9c9c]</div>
-                    // <button
-                    //     className="mt-2 mb-1 bg-[#B8ACAC] px-2 py-1 rounded cursor-pointer"
-                    //     onClick={handleProtectedAction}
-                    // >
-                    //     Add note
-                    // </button>
-                    // <textarea
-                    //     className="w-full p-2 border border-[#AA9C9C] focus:outline-none focus:ring-2 focus:ring-[#AA9C9C]"
-                    //     placeholder="Enter password here"
-                    //     onChange={(e) => e.target.value}
-                    //     />
+// <button className="pt-2 cursor-pointer"
+//                     onClick={handleProtectedAction}
+//                     >
+//                         <FaPaperPlane />
+// <div>border-r border-[#AA9c9c]</div>
+// <button
+//     className="mt-2 mb-1 bg-[#B8ACAC] px-2 py-1 rounded cursor-pointer"
+//     onClick={handleProtectedAction}
+// >
+//     Add note
+// </button>
+// <textarea
+//     className="w-full p-2 border border-[#AA9C9C] focus:outline-none focus:ring-2 focus:ring-[#AA9C9C]"
+//     placeholder="Enter password here"
+//     onChange={(e) => e.target.value}
+//     />

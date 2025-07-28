@@ -20,6 +20,7 @@ import ClippingReflection from "./ClippingReflection";
 
 //icons
 import { FaPaperPlane } from "react-icons/fa";
+import { IoSearch } from "react-icons/io5";
 
 //sample data for site visitors
 export interface Clipping {
@@ -130,10 +131,23 @@ function TitleListSideBar({
   selectedBook,
   onSelect,
 }: BookListSideBarProps) {
+  const [search, setSearch] = useState("");
+  const filteredBooks = books.filter((book) =>
+    book.toLowerCase().includes(search.toLowerCase())
+  );
   return (
-    <aside className="border-r border-[#AA9c9c]">
+    <aside className="border-r border-[#AA9c9c] min-h-full">
+      <div className="flex items-center px-2 py-2 bg-[#AA9c9c]]">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search books..."
+          className="flex-1 px-2 py-1 rounded border border-[#AA9C9C] focus:outline-none focus:ring-2 focus:ring-[#AA9C9C] text-gray-900"
+        />
+      </div>
       <ul>
-        {books.map((book) => (
+        {filteredBooks.map((book) => (
           <li
             key={book}
             className={`cursor-pointer p-2 ${
@@ -329,7 +343,7 @@ export default function ContentComponent() {
               }
             }
           } catch (err) {
-            console.error("Book decryption error:", err, book);
+            // console.error("Book decryption error:", err, book);
             setLoading(false);
             setShowPasswordModal(true);
             return;
