@@ -10,7 +10,7 @@ export default function SignOut({ onSignOut }: { onSignOut?: () => void }) {
   return (
     <button
       onClick={handleSignOut}
-      className="py-2 rounded font-semibold cursor-pointer text-sm"
+      className=" rounded font-semibold cursor-pointer text-sm"
     >
       Sign Out
     </button>

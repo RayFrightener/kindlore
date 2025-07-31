@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { FiUpload } from "react-icons/fi";
 import { useSession } from "next-auth/react";
 import SignIn from "./sign-in";
@@ -91,12 +92,13 @@ export default function Header() {
     }
   }
   return (
-    <header className="w-full bg-[#867979] py-1 flex items-center justify between">
-      <div className="flex-1" />
-      <h1 className="logo-header text-xl font-bold text-center flex-1">
-        KINDLORE
-      </h1>
-      <div className="flex-1 flex justify-end pr-4 gap-4">
+    <header className="w-full bg-[#867979] py-1 flex items-center justify-between">
+      <Link href="/" className="hover:underline">
+        <h1 className="logo-header px-4 cursor-pointer hover:underline text-xl font-bold text-center">
+          KINDLORE
+        </h1>
+      </Link>
+      <div className="flex items-center justify-end pr-4 gap-4">
         <input
           type="file"
           accept=".txt"
@@ -105,12 +107,17 @@ export default function Header() {
           onChange={handleFileChange}
         />
         <button
-          className="  py-2 rounded font-semibold cursor-pointer"
+          className="py-2 rounded font-semibold cursor-pointer"
           onClick={handleUploadClick}
         >
           <FiUpload size={22} />
         </button>
-
+        <Link
+          href="/about"
+          className="py-2 px-3 rounded font-semibold cursor-pointer text-sm transition"
+        >
+          About
+        </Link>
         {status === "loading" ? null : session?.user ? <SignOut /> : <SignIn />}
       </div>
       {toast && (
