@@ -369,7 +369,11 @@ export default function ContentComponent() {
         />
       )}
       <TitleListSideBar
-        books={books}
+        books={
+          session && encryptionKey && books.length
+            ? books
+            : Object.keys(clippingsData)
+        }
         selectedBook={selectedBook!}
         onSelect={setSelectedBook}
       />
