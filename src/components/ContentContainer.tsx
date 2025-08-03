@@ -368,15 +368,21 @@ export default function ContentComponent() {
           onSubmit={handlePasswordSubmit}
         />
       )}
-      <TitleListSideBar
-        books={
-          session && encryptionKey && books.length
-            ? books
-            : Object.keys(clippingsData)
-        }
-        selectedBook={selectedBook!}
-        onSelect={setSelectedBook}
-      />
+      {(session && encryptionKey && books.length > 0) ||
+      !session ||
+      !encryptionKey ? (
+        <TitleListSideBar
+          books={
+            session && encryptionKey && books.length
+              ? books
+              : Object.keys(clippingsData)
+          }
+          selectedBook={selectedBook!}
+          onSelect={setSelectedBook}
+        />
+      ) : (
+        <aside className="border-r border-[#AA9c9c] min-h-full"></aside>
+      )}
       {loading ? (
         <div className="p-4">Loading your books...</div>
       ) : session && encryptionKey && (!clippings || books.length === 0) ? (
