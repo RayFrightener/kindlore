@@ -12,8 +12,8 @@ import { protectedAction } from "@/utils/eternal/protectedAction";
 import PasswordModal from "./PasswordModal";
 import { generateSalt, deriveKey } from "@/utils/eternal/encryptionUtils";
 import { useEncryptionKey } from "@/components/EncryptionKeyContext";
-import { decryptWithKey } from "@/utils/eternal/encryptionUtils";
 import ClippingReflection from "./ClippingReflection";
+import { useClippings } from "@/components/ClippingsContext";
 
 //icons
 import { FaPaperPlane } from "react-icons/fa";
@@ -222,16 +222,12 @@ function Content({ clippings }: BookContentProps) {
 
 //parent component that handles BookListBar + BookContent layout and props
 export default function ContentComponent() {
+  const { clippings, books, loading } = useClippings();
   const { data: session } = useSession();
-  const [books, setBooks] = useState<string[]>([]);
+  const { encryptionKey, setEncryptionKey } = useEncryptionKey();
   const [selectedBook, setSelectedBook] = useState<string | undefined>(
     undefined
   );
-  const [userClippings, setUserClippings] = useState<ClippingsData | null>(
-    null
-  );
-  const [loading, setLoading] = useState(false);
-  const { encryptionKey, setEncryptionKey } = useEncryptionKey();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState<boolean | null>(null);
 
@@ -272,90 +268,95 @@ export default function ContentComponent() {
       });
   }, []);
 
+  // useEffect(() => {
+  //   if (!session) {
+  //     // Not signed in: show demo data
+  //     setBooks(Object.keys(clippingsData));
+  //     setSelectedBook(Object.keys(clippingsData)[0]);
+  //     setUserClippings(null);
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   if (!encryptionKey) return; // Don't fetch if key not set
+
+  //   setLoading(true);
+  //   fetch("/api/books")
+  //     .then((res) => res.json())
+  //     .then(async ({ books }) => {
+  //       if (!books || books.length === 0) {
+  //         setUserClippings(null);
+  //         setBooks([]);
+  //         setLoading(false);
+  //         return;
+  //       }
+  //       // Decrypt books and clippings
+  //       const decryptedData: ClippingsData = {};
+  //       for (const book of books) {
+  //         try {
+  //           const title = await decryptWithKey(
+  //             encryptionKey,
+  //             book.title,
+  //             book.titleIv
+  //           );
+  //           decryptedData[title] = [];
+  //           for (const clip of book.clippings) {
+  //             try {
+  //               const clippingText = await decryptWithKey(
+  //                 encryptionKey,
+  //                 clip.highlight,
+  //                 clip.iv
+  //               );
+  //               // Convert addedAt to date and time strings
+  //               const addedAt = clip.addedAt ? new Date(clip.addedAt) : null;
+  //               const dateStr = addedAt
+  //                 ? addedAt.toLocaleDateString(undefined, {
+  //                     weekday: "long",
+  //                     year: "numeric",
+  //                     month: "long",
+  //                     day: "numeric",
+  //                   })
+  //                 : "";
+  //               const timeStr = addedAt
+  //                 ? addedAt.toLocaleTimeString(undefined, {
+  //                     hour: "2-digit",
+  //                     minute: "2-digit",
+  //                     second: "2-digit",
+  //                   })
+  //                 : "";
+  //               decryptedData[title].push({
+  //                 id: clip.id,
+  //                 date: dateStr,
+  //                 time: timeStr,
+  //                 clipping: clippingText,
+  //               });
+  //             } catch (err) {
+  //               console.error("Clipping decryption error:", err, clip);
+  //               // Optionally skip this clipping
+  //             }
+  //           }
+  //         } catch {
+  //           setLoading(false);
+  //           setShowPasswordModal(true);
+  //           return;
+  //         }
+  //       }
+
+  //       setUserClippings(decryptedData);
+  //       setBooks(Object.keys(decryptedData));
+  //       setSelectedBook(Object.keys(decryptedData)[0]);
+  //       setLoading(false);
+  //     });
+  // }, [session, encryptionKey]);
+  // Set selectedBook when books change
   useEffect(() => {
-    if (!session) {
-      // Not signed in: show demo data
-      setBooks(Object.keys(clippingsData));
-      setSelectedBook(Object.keys(clippingsData)[0]);
-      setUserClippings(null);
-      setLoading(false);
-      return;
+    if (!selectedBook && books.length > 0) {
+      setSelectedBook(books[0]);
     }
-    if (!encryptionKey) return; // Don't fetch if key not set
-
-    setLoading(true);
-    fetch("/api/books")
-      .then((res) => res.json())
-      .then(async ({ books }) => {
-        if (!books || books.length === 0) {
-          setUserClippings(null);
-          setBooks([]);
-          setLoading(false);
-          return;
-        }
-        // Decrypt books and clippings
-        const decryptedData: ClippingsData = {};
-        for (const book of books) {
-          try {
-            const title = await decryptWithKey(
-              encryptionKey,
-              book.title,
-              book.titleIv
-            );
-            decryptedData[title] = [];
-            for (const clip of book.clippings) {
-              try {
-                const clippingText = await decryptWithKey(
-                  encryptionKey,
-                  clip.highlight,
-                  clip.iv
-                );
-                // Convert addedAt to date and time strings
-                const addedAt = clip.addedAt ? new Date(clip.addedAt) : null;
-                const dateStr = addedAt
-                  ? addedAt.toLocaleDateString(undefined, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "";
-                const timeStr = addedAt
-                  ? addedAt.toLocaleTimeString(undefined, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
-                    })
-                  : "";
-                decryptedData[title].push({
-                  id: clip.id,
-                  date: dateStr,
-                  time: timeStr,
-                  clipping: clippingText,
-                });
-              } catch (err) {
-                console.error("Clipping decryption error:", err, clip);
-                // Optionally skip this clipping
-              }
-            }
-          } catch {
-            setLoading(false);
-            setShowPasswordModal(true);
-            return;
-          }
-        }
-
-        setUserClippings(decryptedData);
-        setBooks(Object.keys(decryptedData));
-        setSelectedBook(Object.keys(decryptedData)[0]);
-        setLoading(false);
-      });
-  }, [session, encryptionKey]);
-
+  }, [books, selectedBook]);
   // Choose data source
   const clippingsToShow =
-    session && encryptionKey && userClippings
-      ? userClippings[selectedBook!] || []
+    session && encryptionKey && clippings
+      ? clippings[selectedBook!] || []
       : clippingsData[selectedBook || Object.keys(clippingsData)[0]];
 
   // Render
@@ -374,7 +375,7 @@ export default function ContentComponent() {
       />
       {loading ? (
         <div className="p-4">Loading your books...</div>
-      ) : session && encryptionKey && (!userClippings || books.length === 0) ? (
+      ) : session && encryptionKey && (!clippings || books.length === 0) ? (
         <div className="p-4">Please upload a file to see your clippings.</div>
       ) : (
         <Content clippings={clippingsToShow} />

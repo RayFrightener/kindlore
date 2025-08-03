@@ -4,7 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import SessionWrapper from "@/components/SessionWrapper";
 import { EncryptionKeyProvider } from "@/components/EncryptionKeyContext";
-
+import { ClippingsProvider } from "@/components/ClippingsContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,8 +33,10 @@ export default function RootLayout({
       >
         <SessionWrapper>
           <EncryptionKeyProvider>
-          <Header />
-            {children}
+            <ClippingsProvider>
+              <Header />
+              {children}
+            </ClippingsProvider>
           </EncryptionKeyProvider>
         </SessionWrapper>
       </body>

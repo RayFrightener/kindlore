@@ -10,12 +10,14 @@ import React, { useRef } from "react";
 import { useEncryptionKey } from "@/components/EncryptionKeyContext";
 import { encryptWithKey } from "@/utils/eternal/encryptionUtils";
 import { parseClippings } from "@/utils/parseClippings";
+import { useClippings } from "@/components/ClippingsContext";
 
 export default function Header() {
   const { data: session, status } = useSession();
   const [toast, showToast] = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { encryptionKey } = useEncryptionKey();
+  const { refreshClippings } = useClippings();
 
   function handleUploadClick() {
     if (!protectedAction(session, showToast)) return;
@@ -86,6 +88,7 @@ export default function Header() {
         return;
       }
       showToast("Upload successful!");
+      await refreshClippings();
       // Optionally handle response data here
     } catch {
       showToast("Network error. Please try again.");
