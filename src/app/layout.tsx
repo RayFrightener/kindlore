@@ -20,9 +20,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Kindlore",
   description: "organize and reflect on your kindle clippings",
-  icons: {
-    icon: "/favicon.ico",
-  },
 };
 
 export default function RootLayout({
