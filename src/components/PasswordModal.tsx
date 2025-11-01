@@ -39,8 +39,8 @@ export default function PasswordModal({
             <>
               Your data is{" "}
               <span className="font-semibold">end-to-end encrypted</span>. This
-              means only you can view your books, highlights, and reflections—no
-              one else, not even Kindlore. <br />
+              means only you can view your books, highlights, and reflections,
+              no one else, not even Kindlore. <br />
               Please set a password to protect your privacy. <br />
               <span className="font-semibold text-red-700">
                 If you forget your password, your data cannot be recovered.
