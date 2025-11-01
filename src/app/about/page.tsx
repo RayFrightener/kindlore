@@ -1,4 +1,5 @@
 import Link from "next/link";
+import FeedbackForm from "@/components/FeedbackForm";
 
 export default function AboutPage() {
   return (
@@ -22,7 +23,7 @@ export default function AboutPage() {
       </p>
       <p className="mb-4">
         <span className="font-semibold">Your privacy matters:</span> All your
-        data—including highlights and reflections—is{" "}
+        data, including highlights and reflections, is{" "}
         <span className="font-semibold">end-to-end encrypted</span>. Only you
         can decrypt your information using the password you set at first
         sign-in.{" "}
@@ -39,15 +40,11 @@ export default function AboutPage() {
       </p>
       <p className="mb-2">
         <span className="font-semibold">Contact:</span> If you have questions,
-        feedback, or need support, please{" "}
-        <a
-          href="mailto:rayfrightener7@gmail.com"
-          className="text-blue-700 underline hover:text-blue-900"
-        >
-          send me an email
-        </a>
-        .
+        feedback, or need support, please use the feedback form below.
       </p>
+      <div className="mt-8 pt-6 border-t border-[#AA9C9C]">
+        <FeedbackForm />
+      </div>
     </div>
   );
 }

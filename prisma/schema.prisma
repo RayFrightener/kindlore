@@ -21,6 +21,8 @@ model User {
   books        Book[]
   clippings    Clipping[]
   reflections  Reflection[]
+  dailyActivity UserDailyActivity[]
+  feedback     Feedback[]
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -98,7 +100,17 @@ model Book {
 
   @@unique([userId, title])
 }
+model UserDailyActivity {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activityDate DateTime @default(now())
+  createdAt    DateTime @default(now())
 
+  @@unique([userId, activityDate])
+  @@index([userId])
+  @@index([activityDate])
+}
 model Clipping {
   id        String       @id @default(cuid())
   bookId    String
@@ -130,4 +142,23 @@ model Reflection {
 
   @@index([clippingId])
   @@index([userId])
+}
+model Feedback {
+  id                String    @id @default(cuid())
+  userId            String?   // Optional - allows anonymous feedback
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Feedback fields (all optional)
+  heardFrom         String?   // "reddit", "discord", "other"
+  heardFromOther    String?   // if heardFrom === "other"
+  expectedToDo      String?   // What did you expect it to do?
+  confusedOrDidntWork String? // What confused or didn't work?
+  wouldUseAgain     String?   // "yes", "no"
+  wouldUseAgainWhy   String?   // Why/Why not text
+  emailForUpdates   String?   // Optional email for early features
+  
+  createdAt         DateTime  @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }

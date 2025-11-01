@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import SessionWrapper from "@/components/SessionWrapper";
 import { EncryptionKeyProvider } from "@/components/EncryptionKeyContext";
 import { ClippingsProvider } from "@/components/ClippingsContext";
+import Heartbeat from "@/components/Heartbeat";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Kindlore",
   description: "organize and reflect on your kindle clippings",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +36,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionWrapper>
+          <Heartbeat />
           <EncryptionKeyProvider>
             <ClippingsProvider>
               <Header />
