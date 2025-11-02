@@ -6,6 +6,7 @@ import SessionWrapper from "@/components/SessionWrapper";
 import { EncryptionKeyProvider } from "@/components/EncryptionKeyContext";
 import { ClippingsProvider } from "@/components/ClippingsContext";
 import Heartbeat from "@/components/Heartbeat";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({
             </ClippingsProvider>
           </EncryptionKeyProvider>
         </SessionWrapper>
+        <Analytics />
       </body>
     </html>
   );
